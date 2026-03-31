@@ -3,9 +3,81 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="DevSimulator" Height="700" Width="1200"
         Background="#1e1e1e">
-    <Grid>
-        <TextBlock Text="DevSimulator" Foreground="White"
-                   HorizontalAlignment="Center" VerticalAlignment="Center"
-                   FontSize="24"/>
-    </Grid>
+
+    <Window.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="10,4"/>
+            <Setter Property="Margin" Value="2"/>
+        </Style>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#cccccc"/>
+        </Style>
+    </Window.Resources>
+
+    <DockPanel>
+        <!-- Toolbar -->
+        <ToolBar DockPanel.Dock="Top" Background="#323233">
+            <Button Command="{Binding StartCommand}" Background="#107c10">▶ 시작</Button>
+            <Button Command="{Binding StopCommand}"  Background="#d83b01">⏹ 정지</Button>
+            <Separator/>
+            <TextBlock Text="IP:" VerticalAlignment="Center"/>
+            <TextBox Text="{Binding Ip}" Width="120" Margin="4,0"/>
+            <TextBlock Text="Port:" VerticalAlignment="Center"/>
+            <TextBox Text="{Binding Port}" Width="60" Margin="4,0"/>
+            <Separator/>
+            <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center" Margin="8,0"/>
+            <TextBlock Text="{Binding ConnectedClients, StringFormat='클라이언트: {0}'}"
+                       VerticalAlignment="Center" Margin="8,0"/>
+        </ToolBar>
+
+        <!-- Main area -->
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="150"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="200"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Node Palette -->
+            <StackPanel Grid.Column="0" Background="#252526">
+                <TextBlock Text="노드 팔레트" Margin="8,8,8,4"
+                           FontSize="10" Foreground="#888888"/>
+                <Button Tag="SetValue" Click="PaletteButton_Click"
+                        Background="#ca5010" Margin="6,2">✏️ Set Value</Button>
+                <Button Tag="Wait" Click="PaletteButton_Click"
+                        Background="#4a1942" Margin="6,2">⏱️ Wait</Button>
+                <Button Tag="Condition" Click="PaletteButton_Click"
+                        Background="#5c2d91" Margin="6,2">🔀 Condition</Button>
+                <Button Tag="End" Click="PaletteButton_Click"
+                        Background="#d83b01" Margin="6,2">🔴 End</Button>
+            </StackPanel>
+
+            <!-- FlowChart Canvas -->
+            <Border Grid.Column="1" Background="#1e1e1e" x:Name="CanvasBorder">
+                <Canvas x:Name="FlowCanvas" Background="Transparent"
+                        AllowDrop="True" Drop="FlowCanvas_Drop"
+                        DragOver="FlowCanvas_DragOver"/>
+            </Border>
+
+            <!-- Device Monitor -->
+            <Border Grid.Column="2" Background="#252526">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="디바이스 모니터"
+                               Margin="8,8,8,4" FontSize="10" Foreground="#888888"/>
+                    <DataGrid ItemsSource="{Binding Monitor.Entries}"
+                              AutoGenerateColumns="False"
+                              Background="#1e1e1e" Foreground="#cccccc"
+                              GridLinesVisibility="Horizontal"
+                              HeadersVisibility="Column"
+                              CanUserAddRows="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Key"   Binding="{Binding Key}"   Width="80"/>
+                            <DataGridTextColumn Header="Value" Binding="{Binding Value}"  Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </Border>
+        </Grid>
+    </DockPanel>
 </Window>
