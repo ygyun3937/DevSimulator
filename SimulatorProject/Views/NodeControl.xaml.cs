@@ -1,39 +1,90 @@
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
 using SimulatorProject.ViewModels;
 
 namespace SimulatorProject.Views;
 
 public partial class NodeControl : UserControl
 {
-    private bool _isDragging;
+    private Storyboard? _pulseStoryboard;
 
-    public NodeControl() => InitializeComponent();
-
-    private void NodeControl_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    public NodeControl()
     {
-        _isDragging = true;
-        CaptureMouse();
+        InitializeComponent();
+        DataContextChanged += OnDataContextChanged;
     }
 
-    private void NodeControl_MouseMove(object sender, MouseEventArgs e)
+    private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
-        if (!_isDragging || DataContext is not NodeViewModel vm) return;
-        var pos = e.GetPosition(Parent as Canvas);
-        vm.X = pos.X - 70;
-        vm.Y = pos.Y - 25;
-        Canvas.SetLeft(this, vm.X);
-        Canvas.SetTop(this, vm.Y);
+        if (e.OldValue is INotifyPropertyChanged oldVm)
+            oldVm.PropertyChanged -= OnViewModelPropertyChanged;
+        if (e.NewValue is INotifyPropertyChanged newVm)
+            newVm.PropertyChanged += OnViewModelPropertyChanged;
 
-        // Refresh connection lines
-        if (Window.GetWindow(this) is MainWindow win)
-            win.RefreshCanvas();
+        if (e.NewValue is NodeViewModel vm)
+            UpdateAnimation(vm.IsExecuting);
     }
 
-    private void NodeControl_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        _isDragging = false;
-        ReleaseMouseCapture();
+        if (e.PropertyName == nameof(NodeViewModel.IsExecuting) && sender is NodeViewModel vm)
+            UpdateAnimation(vm.IsExecuting);
+    }
+
+    private void UpdateAnimation(bool isExecuting)
+    {
+        if (isExecuting)
+            StartPulse();
+        else
+            StopPulse();
+    }
+
+    private void StartPulse()
+    {
+        GlowBorder.Background = new SolidColorBrush(Color.FromRgb(0x00, 0xFF, 0x00));
+
+        var opacityAnim = new DoubleAnimation
+        {
+            From = 0.0,
+            To = 0.6,
+            Duration = TimeSpan.FromMilliseconds(600),
+            AutoReverse = true,
+            RepeatBehavior = RepeatBehavior.Forever,
+            EasingFunction = new SineEase()
+        };
+
+        var borderOpacityAnim = new DoubleAnimation
+        {
+            From = 0.7,
+            To = 1.0,
+            Duration = TimeSpan.FromMilliseconds(600),
+            AutoReverse = true,
+            RepeatBehavior = RepeatBehavior.Forever,
+            EasingFunction = new SineEase()
+        };
+
+        _pulseStoryboard = new Storyboard();
+
+        Storyboard.SetTarget(opacityAnim, GlowBorder);
+        Storyboard.SetTargetProperty(opacityAnim, new PropertyPath(OpacityProperty));
+
+        Storyboard.SetTarget(borderOpacityAnim, MainBorder);
+        Storyboard.SetTargetProperty(borderOpacityAnim, new PropertyPath(OpacityProperty));
+
+        _pulseStoryboard.Children.Add(opacityAnim);
+        _pulseStoryboard.Children.Add(borderOpacityAnim);
+        _pulseStoryboard.Begin();
+    }
+
+    private void StopPulse()
+    {
+        _pulseStoryboard?.Stop();
+        _pulseStoryboard = null;
+        GlowBorder.Opacity = 0;
+        GlowBorder.Background = Brushes.Transparent;
+        MainBorder.Opacity = 1.0;
     }
 }

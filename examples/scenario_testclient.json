@@ -1,0 +1,171 @@
+[
+  {
+    "$type": "DeviceStateChange",
+    "DisplayName": "\uC7A5\uCE58 \uC0C1\uD0DC \uBCC0\uACBD",
+    "VariableName": "power",
+    "VariableValue": "ON",
+    "Id": "a0000001-0001-0001-0001-000000000001",
+    "X": 0,
+    "Y": 0,
+    "Order": 0,
+    "NextNodeId": "a0000001-0001-0001-0001-000000000002"
+  },
+  {
+    "$type": "DeviceStateChange",
+    "DisplayName": "\uC7A5\uCE58 \uC0C1\uD0DC \uBCC0\uACBD",
+    "VariableName": "mode",
+    "VariableValue": "IDLE",
+    "Id": "a0000001-0001-0001-0001-000000000002",
+    "X": 0,
+    "Y": 0,
+    "Order": 1,
+    "NextNodeId": "a0000001-0001-0001-0001-000000000003"
+  },
+  {
+    "$type": "WaitCondition",
+    "DisplayName": "Wait Condition",
+    "DeviceKey": "M100",
+    "Operator": 0,
+    "CompareValue": 1,
+    "PollingMs": 100,
+    "TimeoutMs": 30000,
+    "TimeoutNodeId": null,
+    "Id": "a0000001-0001-0001-0001-000000000003",
+    "X": 0,
+    "Y": 0,
+    "Order": 2,
+    "NextNodeId": "a0000001-0001-0001-0001-000000000004"
+  },
+  {
+    "$type": "DeviceStateChange",
+    "DisplayName": "\uC7A5\uCE58 \uC0C1\uD0DC \uBCC0\uACBD",
+    "VariableName": "mode",
+    "VariableValue": "PROCESSING",
+    "Id": "a0000001-0001-0001-0001-000000000004",
+    "X": 0,
+    "Y": 0,
+    "Order": 3,
+    "NextNodeId": "a0000001-0001-0001-0001-000000000005"
+  },
+  {
+    "$type": "Wait",
+    "DisplayName": "Wait",
+    "DelayMs": 500,
+    "Id": "a0000001-0001-0001-0001-000000000005",
+    "X": 0,
+    "Y": 0,
+    "Order": 4,
+    "NextNodeId": "a0000001-0001-0001-0001-000000000006"
+  },
+  {
+    "$type": "SetValue",
+    "DisplayName": "Set Value",
+    "DeviceKey": "D200",
+    "Value": 1,
+    "Id": "a0000001-0001-0001-0001-000000000006",
+    "X": 0,
+    "Y": 0,
+    "Order": 5,
+    "NextNodeId": "a0000001-0001-0001-0001-000000000007"
+  },
+  {
+    "$type": "SetValue",
+    "DisplayName": "Set Value",
+    "DeviceKey": "D201",
+    "Value": 42,
+    "Id": "a0000001-0001-0001-0001-000000000007",
+    "X": 0,
+    "Y": 0,
+    "Order": 6,
+    "NextNodeId": "a0000001-0001-0001-0001-000000000008"
+  },
+  {
+    "$type": "SetValue",
+    "DisplayName": "Set Value",
+    "DeviceKey": "M101",
+    "Value": 1,
+    "Id": "a0000001-0001-0001-0001-000000000008",
+    "X": 0,
+    "Y": 0,
+    "Order": 7,
+    "NextNodeId": "a0000001-0001-0001-0001-000000000009"
+  },
+  {
+    "$type": "DeviceStateChange",
+    "DisplayName": "\uC7A5\uCE58 \uC0C1\uD0DC \uBCC0\uACBD",
+    "VariableName": "mode",
+    "VariableValue": "DONE",
+    "Id": "a0000001-0001-0001-0001-000000000009",
+    "X": 0,
+    "Y": 0,
+    "Order": 8,
+    "NextNodeId": "a0000001-0001-0001-0001-000000000010"
+  },
+  {
+    "$type": "WaitCondition",
+    "DisplayName": "Wait Condition",
+    "DeviceKey": "M100",
+    "Operator": 0,
+    "CompareValue": 0,
+    "PollingMs": 100,
+    "TimeoutMs": 10000,
+    "TimeoutNodeId": null,
+    "Id": "a0000001-0001-0001-0001-000000000010",
+    "X": 0,
+    "Y": 0,
+    "Order": 9,
+    "NextNodeId": "eb41b50a-e0f8-4338-861b-c099c8aaa0bd"
+  },
+  {
+    "$type": "Wait",
+    "DisplayName": "Wait",
+    "DelayMs": 3000,
+    "Id": "eb41b50a-e0f8-4338-861b-c099c8aaa0bd",
+    "X": 0,
+    "Y": 0,
+    "Order": 10,
+    "NextNodeId": "a0000001-0001-0001-0001-000000000011"
+  },
+  {
+    "$type": "SetValue",
+    "DisplayName": "Set Value",
+    "DeviceKey": "M101",
+    "Value": 0,
+    "Id": "a0000001-0001-0001-0001-000000000011",
+    "X": 0,
+    "Y": 0,
+    "Order": 11,
+    "NextNodeId": "a7c21e0f-e5d7-48df-ab44-1fab444cb4df"
+  },
+  {
+    "$type": "Wait",
+    "DisplayName": "Wait",
+    "DelayMs": 3000,
+    "Id": "a7c21e0f-e5d7-48df-ab44-1fab444cb4df",
+    "X": 0,
+    "Y": 0,
+    "Order": 12,
+    "NextNodeId": "a0000001-0001-0001-0001-000000000012"
+  },
+  {
+    "$type": "DeviceStateChange",
+    "DisplayName": "\uC7A5\uCE58 \uC0C1\uD0DC \uBCC0\uACBD",
+    "VariableName": "mode",
+    "VariableValue": "IDLE",
+    "Id": "a0000001-0001-0001-0001-000000000012",
+    "X": 0,
+    "Y": 0,
+    "Order": 13,
+    "NextNodeId": "c4a42d5e-2ebc-494d-9000-2b6dbe0d8705"
+  },
+  {
+    "$type": "Wait",
+    "DisplayName": "Wait",
+    "DelayMs": 3000,
+    "Id": "c4a42d5e-2ebc-494d-9000-2b6dbe0d8705",
+    "X": 0,
+    "Y": 0,
+    "Order": 14,
+    "NextNodeId": null
+  }
+]

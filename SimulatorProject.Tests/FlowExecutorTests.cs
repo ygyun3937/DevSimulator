@@ -1,6 +1,7 @@
 using FluentAssertions;
 using SimulatorProject.Engine;
 using SimulatorProject.Nodes;
+using Xunit;
 
 namespace SimulatorProject.Tests;
 
@@ -87,6 +88,78 @@ public class FlowExecutorTests
 
         var cts = new CancellationTokenSource(200);
         var act = async () => await executor.RunFromAsync(wait.Id, cts.Token);
+
+        await act.Should().ThrowAsync<OperationCanceledException>();
+    }
+
+    [Fact]
+    public async Task Execute_OnWriteNode_TriggersOnMatchingKey()
+    {
+        var mem = new DeviceMemory();
+        var onWrite = new OnWriteNode { DeviceKey = "D100" };
+        var set     = new SetValueNode { DeviceKey = "D200", Value = 99 };
+        var end     = new EndNode();
+        onWrite.NextNodeId = set.Id;
+        set.NextNodeId     = end.Id;
+
+        var graph = MakeGraph(onWrite, set, end);
+        var executor = new FlowExecutor(graph, mem);
+
+        _ = Task.Run(async () =>
+        {
+            await Task.Delay(200);
+            mem.SetWord("D100", 5);
+        });
+
+        await executor.RunFromAsync(onWrite.Id, CancellationToken.None);
+
+        mem.GetWord("D200").Should().Be(99);
+    }
+
+    [Fact]
+    public async Task Execute_OnWriteNode_IgnoresOtherKeys()
+    {
+        var mem = new DeviceMemory();
+        var onWrite = new OnWriteNode { DeviceKey = "D100" };
+        var set     = new SetValueNode { DeviceKey = "D200", Value = 99 };
+        var end     = new EndNode();
+        onWrite.NextNodeId = set.Id;
+        set.NextNodeId     = end.Id;
+
+        var graph = MakeGraph(onWrite, set, end);
+        var executor = new FlowExecutor(graph, mem);
+
+        _ = Task.Run(async () =>
+        {
+            await Task.Delay(50);
+            mem.SetWord("D999", 1); // 다른 키 - 무시되어야 함
+            await Task.Delay(150);
+            mem.SetWord("D100", 7); // 매칭 키 - 트리거
+        });
+
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        await executor.RunFromAsync(onWrite.Id, CancellationToken.None);
+        sw.Stop();
+
+        mem.GetWord("D200").Should().Be(99);
+        sw.ElapsedMilliseconds.Should().BeGreaterOrEqualTo(180);
+    }
+
+    [Fact]
+    public async Task Execute_OnWriteNode_RespectsCancellation()
+    {
+        var mem = new DeviceMemory();
+        var onWrite = new OnWriteNode { DeviceKey = "D100" };
+        var end     = new EndNode();
+        onWrite.NextNodeId = end.Id;
+
+        var graph = MakeGraph(onWrite, end);
+        var executor = new FlowExecutor(graph, mem);
+
+        var cts = new CancellationTokenSource();
+        cts.CancelAfter(200);
+
+        var act = async () => await executor.RunFromAsync(onWrite.Id, cts.Token);
 
         await act.Should().ThrowAsync<OperationCanceledException>();
     }

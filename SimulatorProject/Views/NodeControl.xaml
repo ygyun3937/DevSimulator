@@ -1,14 +1,32 @@
 <UserControl x:Class="SimulatorProject.Views.NodeControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             Width="140" Height="50"
-             MouseLeftButtonDown="NodeControl_MouseLeftButtonDown"
-             MouseMove="NodeControl_MouseMove"
-             MouseLeftButtonUp="NodeControl_MouseLeftButtonUp">
-    <Border BorderThickness="2" CornerRadius="6" Padding="8,4"
-            Background="{Binding Background}"
-            BorderBrush="{Binding BorderColor}">
-        <TextBlock Text="{Binding DisplayName}" Foreground="White"
-                   FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-    </Border>
+             Width="150" Height="60">
+    <Grid>
+        <!-- Glow effect behind the node (only visible when executing) -->
+        <Border x:Name="GlowBorder" CornerRadius="8" Margin="-4"
+                Background="Transparent" Opacity="0" IsHitTestVisible="False">
+            <Border.Effect>
+                <BlurEffect Radius="12"/>
+            </Border.Effect>
+        </Border>
+
+        <!-- Main node -->
+        <Border x:Name="MainBorder" BorderThickness="{Binding BorderWidth}" CornerRadius="6" Padding="8,4"
+                Background="{Binding Background}"
+                BorderBrush="{Binding BorderColor}">
+            <Grid>
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <TextBlock Text="{Binding DisplayName}" Foreground="White"
+                               FontSize="11" FontWeight="Bold" HorizontalAlignment="Center"/>
+                    <TextBlock Text="{Binding DetailText}" Foreground="#dcdcaa"
+                               FontSize="10" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                </StackPanel>
+                <TextBlock Text="{Binding StatusIcon}" Foreground="Lime"
+                           FontSize="10" FontWeight="Bold"
+                           HorizontalAlignment="Left" VerticalAlignment="Top"
+                           Margin="0,-2,0,0"/>
+            </Grid>
+        </Border>
+    </Grid>
 </UserControl>

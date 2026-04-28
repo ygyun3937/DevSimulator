@@ -9,5 +9,15 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
+    <PackageReference Include="Markdig" Version="0.37.0" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2592.51" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\docs\setup-guide.md" Link="Resources\setup-guide.md"
+                      LogicalName="SimulatorProject.Resources.setup-guide.md"
+                      Condition="Exists('..\docs\setup-guide.md')" />
+    <EmbeddedResource Include="..\docs\protocol-guide.md" Link="Resources\protocol-guide.md"
+                      LogicalName="SimulatorProject.Resources.protocol-guide.md"
+                      Condition="Exists('..\docs\protocol-guide.md')" />
   </ItemGroup>
 </Project>

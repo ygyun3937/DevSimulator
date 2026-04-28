@@ -4,6 +4,8 @@ namespace SimulatorProject.Engine;
 
 public class DeviceMemory
 {
+    private static readonly HashSet<char> BitDevicePrefixes = ['M', 'X', 'Y', 'B', 'L'];
+
     private readonly ConcurrentDictionary<string, short> _words = new();
     private readonly ConcurrentDictionary<string, bool> _bits = new();
 
@@ -12,6 +14,11 @@ public class DeviceMemory
     public void SetWord(string key, short value)
     {
         _words[key] = value;
+
+        // 비트 디바이스면 _bits도 동기화
+        if (key.Length > 0 && BitDevicePrefixes.Contains(key[0]))
+            _bits[key] = value != 0;
+
         ValueChanged?.Invoke(key, value);
     }
 
@@ -21,6 +28,10 @@ public class DeviceMemory
     public void SetBit(string key, bool value)
     {
         _bits[key] = value;
+
+        // _words도 동기화
+        _words[key] = value ? (short)1 : (short)0;
+
         ValueChanged?.Invoke(key, value);
     }
 

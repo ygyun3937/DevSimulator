@@ -1,3 +1,5 @@
+using Xunit;
+
 namespace SimulatorProject.Tests;
 
 public class UnitTest1

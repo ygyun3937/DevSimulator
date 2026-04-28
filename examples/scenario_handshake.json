@@ -1,0 +1,89 @@
+[
+  {
+    "$type": "WaitCondition",
+    "DeviceKey": "M100",
+    "Operator": 0,
+    "CompareValue": 1,
+    "PollingMs": 100,
+    "TimeoutMs": 10000,
+    "TimeoutNodeId": "eeee0000-0000-0000-0000-000000000008",
+    "NextNodeId": "aaaa0000-0000-0000-0000-000000000002",
+    "Id": "aaaa0000-0000-0000-0000-000000000001",
+    "X": 300,
+    "Y": 40
+  },
+  {
+    "$type": "SetValue",
+    "DeviceKey": "D200",
+    "Value": 1,
+    "NextNodeId": "aaaa0000-0000-0000-0000-000000000003",
+    "Id": "aaaa0000-0000-0000-0000-000000000002",
+    "X": 300,
+    "Y": 140
+  },
+  {
+    "$type": "SetValue",
+    "DeviceKey": "D201",
+    "Value": 100,
+    "NextNodeId": "aaaa0000-0000-0000-0000-000000000004",
+    "Id": "aaaa0000-0000-0000-0000-000000000003",
+    "X": 300,
+    "Y": 230
+  },
+  {
+    "$type": "SetValue",
+    "DeviceKey": "M101",
+    "Value": 1,
+    "NextNodeId": "aaaa0000-0000-0000-0000-000000000005",
+    "Id": "aaaa0000-0000-0000-0000-000000000004",
+    "X": 300,
+    "Y": 320
+  },
+  {
+    "$type": "WaitCondition",
+    "DeviceKey": "M100",
+    "Operator": 0,
+    "CompareValue": 0,
+    "PollingMs": 100,
+    "TimeoutMs": 5000,
+    "TimeoutNodeId": "eeee0000-0000-0000-0000-000000000008",
+    "NextNodeId": "aaaa0000-0000-0000-0000-000000000006",
+    "Id": "aaaa0000-0000-0000-0000-000000000005",
+    "X": 300,
+    "Y": 410
+  },
+  {
+    "$type": "SetValue",
+    "DeviceKey": "M101",
+    "Value": 0,
+    "NextNodeId": "aaaa0000-0000-0000-0000-000000000007",
+    "Id": "aaaa0000-0000-0000-0000-000000000006",
+    "X": 300,
+    "Y": 500
+  },
+  {
+    "$type": "SetValue",
+    "DeviceKey": "D200",
+    "Value": 0,
+    "NextNodeId": "aaaa0000-0000-0000-0000-000000000001",
+    "Id": "aaaa0000-0000-0000-0000-000000000007",
+    "X": 300,
+    "Y": 590
+  },
+  {
+    "$type": "SetValue",
+    "DeviceKey": "D200",
+    "Value": 99,
+    "NextNodeId": "aaaa0000-0000-0000-0000-000000000009",
+    "Id": "eeee0000-0000-0000-0000-000000000008",
+    "X": 560,
+    "Y": 230
+  },
+  {
+    "$type": "End",
+    "NextNodeId": null,
+    "Id": "aaaa0000-0000-0000-0000-000000000009",
+    "X": 560,
+    "Y": 330
+  }
+]

@@ -22,14 +22,21 @@ public class TcpServer : IAsyncDisposable
         _memory = memory;
     }
 
-    public async Task StartAsync(string ip, int port)
+    /// <summary>포트 바인딩 (동기). 실패 시 예외 throw.</summary>
+    public void StartListening(string ip, int port)
     {
         _cts = new CancellationTokenSource();
         _listener = new TcpListener(IPAddress.Parse(ip), port);
         _listener.Start();
         LogMessage?.Invoke($"[TcpServer] Listening on {ip}:{port} ({_adapter.Name})");
+    }
 
-        await AcceptLoopAsync(_cts.Token);
+    /// <summary>클라이언트 Accept 루프 (백그라운드 스레드에서 실행).</summary>
+    public Task AcceptClientsAsync()
+    {
+        if (_listener == null || _cts == null) return Task.CompletedTask;
+        // 반드시 스레드풀에서 실행 — UI 스레드 의존 제거
+        return Task.Run(() => AcceptLoopAsync(_cts.Token));
     }
 
     private async Task AcceptLoopAsync(CancellationToken ct)
@@ -38,13 +45,15 @@ public class TcpServer : IAsyncDisposable
         {
             try
             {
-                var client = await _listener!.AcceptTcpClientAsync(ct);
+                var client = await _listener!.AcceptTcpClientAsync(ct).ConfigureAwait(false);
+                LogMessage?.Invoke($"[TcpServer] 클라이언트 연결: {client.Client.RemoteEndPoint}");
                 var task = HandleClientAsync(client, ct);
                 _clientTasks.Add(task);
                 ConnectedClients++;
                 ClientCountChanged?.Invoke(ConnectedClients);
             }
             catch (OperationCanceledException) { break; }
+            catch (ObjectDisposedException) { break; }
             catch (Exception ex)
             {
                 LogMessage?.Invoke($"[TcpServer] Accept error: {ex.Message}");
@@ -62,13 +71,13 @@ public class TcpServer : IAsyncDisposable
             {
                 while (!ct.IsCancellationRequested)
                 {
-                    int read = await stream.ReadAsync(buffer, ct);
+                    int read = await stream.ReadAsync(buffer, ct).ConfigureAwait(false);
                     if (read == 0) break;
 
                     var request = buffer[..read];
-                    var response = await _adapter.HandleRequestAsync(request, _memory);
+                    var response = await _adapter.HandleRequestAsync(request, _memory).ConfigureAwait(false);
                     if (response != null)
-                        await stream.WriteAsync(response, ct);
+                        await stream.WriteAsync(response, ct).ConfigureAwait(false);
                 }
             }
             catch (OperationCanceledException) { }
@@ -80,6 +89,7 @@ public class TcpServer : IAsyncDisposable
             {
                 ConnectedClients--;
                 ClientCountChanged?.Invoke(ConnectedClients);
+                LogMessage?.Invoke("[TcpServer] 클라이언트 연결 해제");
             }
         }
     }
@@ -88,9 +98,10 @@ public class TcpServer : IAsyncDisposable
     {
         _cts?.Cancel();
         _listener?.Stop();
-        await Task.WhenAll(_clientTasks);
+        _listener = null;
+        try { await Task.WhenAll(_clientTasks).ConfigureAwait(false); } catch { }
         _clientTasks.Clear();
-        LogMessage?.Invoke("[TcpServer] Stopped.");
+        ConnectedClients = 0;
     }
 
     public async ValueTask DisposeAsync() => await StopAsync();

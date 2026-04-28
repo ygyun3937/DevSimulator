@@ -1,5 +1,6 @@
 using FluentAssertions;
 using SimulatorProject.Engine;
+using Xunit;
 
 namespace SimulatorProject.Tests;
 

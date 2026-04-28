@@ -26,6 +26,26 @@ public partial class FlowChartViewModel : ObservableObject
         RebuildConnections();
     }
 
+    public void RemoveNode(NodeViewModel nodeVm)
+    {
+        var id = nodeVm.Model.Id;
+
+        // Clear any references to this node
+        foreach (var n in Nodes)
+        {
+            if (n.Model.NextNodeId == id)
+                n.Model.NextNodeId = null;
+            if (n.Model is ConditionNode cn)
+            {
+                if (cn.YesNodeId == id) cn.YesNodeId = null;
+                if (cn.NoNodeId == id) cn.NoNodeId = null;
+            }
+        }
+
+        Nodes.Remove(nodeVm);
+        RebuildConnections();
+    }
+
     public void MarkExecuting(Guid nodeId)
     {
         foreach (var vm in Nodes)
@@ -34,6 +54,19 @@ public partial class FlowChartViewModel : ObservableObject
 
     public Dictionary<Guid, NodeBase> GetGraph() =>
         Nodes.ToDictionary(vm => vm.Model.Id, vm => vm.Model);
+
+    public void LoadGraph(Dictionary<Guid, NodeBase> graph)
+    {
+        Nodes.Clear();
+        Connections.Clear();
+        SelectedNode = null;
+        foreach (var node in graph.Values)
+        {
+            var vm = new NodeViewModel(node);
+            Nodes.Add(vm);
+        }
+        RebuildConnections();
+    }
 
     public void RebuildConnections()
     {
@@ -47,6 +80,13 @@ public partial class FlowChartViewModel : ObservableObject
                     Connections.Add(new ConnectionViewModel(vm, yes, "YES"));
                 if (cond.NoNodeId.HasValue && lookup.TryGetValue(cond.NoNodeId.Value, out var no))
                     Connections.Add(new ConnectionViewModel(vm, no, "NO"));
+            }
+            else if (vm.Model is WaitConditionNode wc)
+            {
+                if (wc.NextNodeId.HasValue && lookup.TryGetValue(wc.NextNodeId.Value, out var next))
+                    Connections.Add(new ConnectionViewModel(vm, next, "OK"));
+                if (wc.TimeoutNodeId.HasValue && lookup.TryGetValue(wc.TimeoutNodeId.Value, out var tout))
+                    Connections.Add(new ConnectionViewModel(vm, tout, "T/O"));
             }
             else if (vm.Model.NextNodeId.HasValue && lookup.TryGetValue(vm.Model.NextNodeId.Value, out var next))
             {

@@ -1,69 +1,61 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using SimulatorProject.Engine;
-using SimulatorProject.Protocol;
-using System.Windows;
 
 namespace SimulatorProject.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {
-    private readonly DeviceMemory _memory = new();
-    private TcpServer? _server;
-    private CancellationTokenSource? _flowCts;
+    public ObservableCollection<DeviceGroupViewModel> Groups { get; } = new();
 
-    public FlowChartViewModel FlowChart { get; }
-    public DeviceMonitorViewModel Monitor { get; }
+    [ObservableProperty] private DeviceGroupViewModel? _selectedGroup;
 
-    [ObservableProperty] private bool _isRunning;
-    [ObservableProperty] private string _ip = "127.0.0.1";
-    [ObservableProperty] private int _port = 5000;
-    [ObservableProperty] private string _statusText = "정지";
-    [ObservableProperty] private int _connectedClients;
+    private int _nextPort = 5000;
 
     public MainViewModel()
     {
-        FlowChart = new FlowChartViewModel(_memory);
-        Monitor = new DeviceMonitorViewModel();
-        Monitor.Subscribe(_memory);
+        // 기본 그룹 1개 생성
+        var defaultGroup = new DeviceGroupViewModel("PLC", _nextPort++);
+        Groups.Add(defaultGroup);
+        SelectedGroup = defaultGroup;
     }
 
     [RelayCommand]
-    private async Task StartAsync()
+    private void AddGroup()
     {
-        if (IsRunning) return;
-        IsRunning = true;
-        StatusText = "실행 중";
-
-        var adapter = new SlmpAdapter();
-        _server = new TcpServer(adapter, _memory);
-        _server.ClientCountChanged += count =>
-            Application.Current.Dispatcher.Invoke(() => ConnectedClients = count);
-
-        _ = _server.StartAsync(Ip, Port);
-
-        _flowCts = new CancellationTokenSource();
-        var graph = FlowChart.GetGraph();
-        var firstNode = graph.Values.FirstOrDefault();
-        if (firstNode != null)
-        {
-            var executor = new FlowExecutor(graph, _memory);
-            executor.NodeExecuting += id =>
-                Application.Current.Dispatcher.Invoke(() => FlowChart.MarkExecuting(id));
-
-            try { await executor.RunFromAsync(firstNode.Id, _flowCts.Token); }
-            catch (OperationCanceledException) { }
-        }
+        var group = new DeviceGroupViewModel("새 그룹", _nextPort++);
+        Groups.Add(group);
+        SelectedGroup = group;
     }
 
     [RelayCommand]
-    private async Task StopAsync()
+    private async Task RemoveGroupAsync(DeviceGroupViewModel group)
     {
-        if (!IsRunning) return;
-        _flowCts?.Cancel();
-        if (_server != null) await _server.StopAsync();
-        IsRunning = false;
-        StatusText = "정지";
-        FlowChart.MarkExecuting(Guid.Empty);
+        if (group.IsRunning)
+            await group.StopAsync();
+        Groups.Remove(group);
+        if (SelectedGroup == group)
+            SelectedGroup = Groups.FirstOrDefault();
+    }
+
+    [RelayCommand]
+    private async Task StartAllAsync()
+    {
+        var tasks = Groups.Where(g => !g.IsRunning).Select(g => g.StartAsync());
+        await Task.WhenAll(tasks);
+    }
+
+    [RelayCommand]
+    private async Task StopAllAsync()
+    {
+        var tasks = Groups.Where(g => g.IsRunning).Select(g => g.StopAsync());
+        await Task.WhenAll(tasks);
+    }
+
+    [RelayCommand]
+    private async Task ResetAllAsync()
+    {
+        foreach (var g in Groups)
+            await g.ResetAsync();
     }
 }
